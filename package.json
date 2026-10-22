@@ -1,0 +1,24 @@
+{
+  "name": "darkskyforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "build:themes": "node tools/build-themes.mjs",
+    "deploy": "node tools/deploy.mjs"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "opentype.js": "2.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "vite": "8.3.5",
+    "wrangler": "4.151.3"
+  }
+}
