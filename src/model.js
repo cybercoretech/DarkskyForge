@@ -45,13 +45,24 @@ export function validateFontName(name, license, originalName) {
   const normalized = name.replace(/[^a-z0-9]/gi,'').toLowerCase();
   if ([...license.reserved, originalName].filter(Boolean).some(n=>normalized.includes(n.replace(/[^a-z0-9]/gi,'').toLowerCase()))) throw Error('Choose a new font name without the original or reserved font names.');
 }
+// A Google Fonts import is stored as a reference to one file in the
+// google/fonts repository at a pinned commit; nothing else can be fetched.
+export const GOOGLE_FONT_FILE=/^[A-Za-z0-9_-]+(\[[A-Za-z,]+\])?\.ttf$/;
+export function googleFontRef(v){
+  if(!v||typeof v!=='object')throw Error('The project is missing its Google Fonts reference.');
+  const ok=/^[0-9a-f]{40}$/.test(v.commit)&&/^[a-z0-9]{1,64}$/.test(v.dir)&&GOOGLE_FONT_FILE.test(v.file)&&typeof v.family==='string'&&/^[^\u0000-\u001f<>]{1,64}$/.test(v.family)&&typeof v.style==='string'&&/^[^\u0000-\u001f<>]{1,48}$/.test(v.style);
+  if(!ok)throw Error('Invalid Google Fonts reference.');
+  return {commit:v.commit,dir:v.dir,file:v.file,family:v.family,style:v.style};
+}
+export const googleFontURL=(ref,name=ref.file)=>`https://raw.githubusercontent.com/google/fonts/${ref.commit}/ofl/${ref.dir}/${encodeURIComponent(name)}`;
 export function validateProject(value) {
   if (!value || value.version !== 1) throw Error('This is not a DarkskyForge v1 project.');
   const s = {...DEFAULT};
   for (const key of ['text','tagline','fontName']) { if(typeof value[key]!=='string') throw Error(`Invalid ${key}.`); s[key]=value[key]; }
   if(s.text.length>48 || s.tagline.length>64 || s.fontName.length>48) throw Error('Project text is too long.');
-  if(!FONT_LIBRARY.some(f=>f.id===value.font) && value.font!=='custom') throw Error('Unknown project font.');
+  if(!FONT_LIBRARY.some(f=>f.id===value.font) && !['custom','google'].includes(value.font)) throw Error('Unknown project font.');
   s.font=value.font;
+  if(s.font==='google') s.googleFont=googleFontRef(value.googleFont);
   for(const key of ['color','accent','background']) { if(!/^#[0-9a-f]{6}$/i.test(value[key])) throw Error('Invalid project colour.'); s[key]=value[key]; }
   for(const [key,min,max] of [['tracking',-10,30],['size',40,180]]) { if(!Number.isFinite(value[key])||value[key]<min||value[key]>max) throw Error(`Invalid ${key}.`); s[key]=value[key]; }
   if(!SYMBOLS.some(sym=>sym.id===value.symbol)) throw Error('Unknown symbol.');

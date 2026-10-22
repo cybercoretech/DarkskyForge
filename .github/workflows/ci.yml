@@ -19,6 +19,8 @@ jobs:
       - run: npm test
       - name: Verify bundled fonts (licences, coverage, pinned checksums)
         run: node tools/fetch-fonts.mjs --check
+      - name: Validate the Google Fonts catalogue
+        run: node tools/build-google-catalog.mjs --check
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'

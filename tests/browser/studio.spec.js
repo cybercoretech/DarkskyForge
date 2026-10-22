@@ -113,3 +113,31 @@ test('The universal Cybercore contact block loads under the site CSP',async({pag
  await expect(page.locator('cybercore-contact')).toHaveAttribute('repo','DarkskyForge');
  expect(violations).toEqual([]);
 });
+
+test('Google Fonts import downloads a pinned family with its licence and survives a reload',async({page})=>{
+ const errors=[],requested=[];page.on('pageerror',e=>errors.push(e.message));
+ // Serve GitHub downloads from local fixtures so the test is deterministic and offline-safe.
+ await page.route('https://raw.githubusercontent.com/**',route=>{const url=route.request().url();requested.push(url);
+  route.fulfill(url.endsWith('/OFL.txt')?{contentType:'text/plain',body:fs.readFileSync('public/fonts/OFL-JetBrains.txt','utf8')}:{contentType:'font/ttf',body:fs.readFileSync('public/fonts/jetbrains-bold.ttf')});});
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ await page.locator('#import-font').click();
+ await expect(page.locator('#gf-count')).toContainText('families');
+ await page.locator('#gf-search').fill('orbitron');
+ await page.locator('#gf-results button',{hasText:'Orbitron'}).first().click();
+ await expect(page.locator('#gf-style option')).toContainText(['Variable · wght (38 kB)']);
+ await expect(page.locator('#gf-note')).toContainText('default instance');
+ const before=await page.locator('#logo-preview svg').innerHTML();
+ await page.locator('#gf-import').click();
+ await expect(page.locator('#font-select')).toHaveValue('google');
+ await expect(page.locator('#font-select option[value="google"]')).toContainText('Orbitron / Variable · wght · Google Fonts');
+ await expect.poll(()=>page.locator('#logo-preview svg').innerHTML()).not.toBe(before);
+ const commit=JSON.parse(fs.readFileSync('public/google-fonts/catalog.json','utf8')).commit;
+ expect(requested.sort()).toEqual([`https://raw.githubusercontent.com/google/fonts/${commit}/ofl/orbitron/OFL.txt`,`https://raw.githubusercontent.com/google/fonts/${commit}/ofl/orbitron/Orbitron%5Bwght%5D.ttf`]);
+ await page.reload();await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ await expect(page.locator('#font-select')).toHaveValue('google');
+ await page.getByRole('button',{name:/02 Glyph lab/}).click();await page.locator('#font-name').fill('Orbit Test');
+ for(const id of ['#format-ttf','#format-woff2'])await page.locator(id).uncheck();
+ const dl=page.waitForEvent('download');await page.locator('#export-font').click();const files=unzipSync(fs.readFileSync(await(await dl).path()));
+ expect(strFromU8(files['README.txt'])).toContain(`google/fonts commit ${commit}`);
+ expect(errors).toEqual([]);
+});
