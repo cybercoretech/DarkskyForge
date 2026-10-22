@@ -1,9 +1,31 @@
 import * as opentype from 'opentype.js/dist/opentype.mjs';
 
-export const FONT_LIBRARY = [
-  {id:'krypton', name:'Monaspace Krypton', style:'ExtraBold · mechanical / mono', url:'/fonts/krypton.woff', license:'/fonts/OFL-Monaspace.txt'},
-  {id:'jetbrains', name:'JetBrains Mono', style:'Bold · precise / mono', url:'/fonts/jetbrains-bold.ttf', license:'/fonts/OFL-JetBrains.txt'},
+// Bundled typefaces are listed in tools/fonts.json; tools/fetch-fonts.mjs
+// verifies each one and generates src/font-library.js.
+import {FONT_LIBRARY,FONT_GROUPS} from './font-library.js';
+export {FONT_LIBRARY,FONT_GROUPS};
+// Logo symbols: stroked outlines in a 96×100 box, drawn in the accent colour.
+export const SYMBOLS = [
+  {id:'brackets', label:'〈 / 〉  Forge brackets', svg:'<path d="M28 4 4 28v44l24 24M68 4l24 24v44L68 96M59 18 37 82"/>'},
+  {id:'orbit', label:'◎  Orbital', svg:'<ellipse cx="48" cy="50" rx="45" ry="19" transform="rotate(-45 48 50)"/><circle cx="48" cy="50" r="28"/><path d="M48 5v15M48 80v15"/>'},
+  {id:'diamond', label:'◇  Prism', svg:'<path d="m48 3 45 47-45 47L3 50Z M48 25 72 50 48 75 24 50Z"/>'},
+  {id:'hexagon', label:'⬡  Hex core', svg:'<path d="M48 4 88 27v46L48 96 8 73V27Z M48 26 69 38v24L48 74 27 62V38Z"/>'},
+  {id:'chip', label:'▣  Circuit chip', svg:'<rect x="26" y="28" width="44" height="44"/><rect x="40" y="42" width="16" height="16"/><path d="M36 28V12M48 28V12M60 28V12M36 72v16M48 72v16M60 72v16M26 40H10M26 60H10M70 40h16M70 60h16"/>'},
+  {id:'prompt', label:'>_  Prompt', svg:'<path d="M10 22 40 50 10 78M48 80h40"/>'},
+  {id:'omega', label:'Ω  Omega', svg:'<path d="M12 92h24v-8C20 76 12 62 12 47 12 25 28 8 48 8s36 17 36 39c0 15-8 29-24 37v8h24"/>'},
+  {id:'trident', label:'Ψ  Trident', svg:'<path d="M48 96V22M18 12v22c0 12 13 18 30 18s30-6 30-18V12M48 4l-8 14h16Z"/>'},
+  {id:'eye', label:'◉  Alien eye', svg:'<path d="M4 50C20 22 76 22 92 50 76 78 20 78 4 50Z"/><ellipse cx="48" cy="50" rx="7" ry="20"/>'},
+  {id:'delta', label:'△  Delta rune', svg:'<path d="M48 6 92 92H4Z M48 40 66 76H30Z"/>'},
+  {id:'crosshair', label:'⌖  Crosshair', svg:'<circle cx="48" cy="50" r="34"/><circle cx="48" cy="50" r="6"/><path d="M48 4v26M48 70v26M2 50h26M68 50h26"/>'},
+  {id:'planet', label:'◍  Ringed planet', svg:'<circle cx="48" cy="50" r="24"/><ellipse cx="48" cy="50" rx="46" ry="14" transform="rotate(-20 48 50)"/>'},
+  {id:'bolt', label:'ϟ  Bolt', svg:'<path d="M58 4 18 56h28l-8 40 40-54H50Z"/>'},
+  {id:'shield', label:'⛨  Shield', svg:'<path d="M48 4 86 18v30c0 24-16 40-38 48C26 88 10 72 10 48V18Z M48 26v48"/>'},
+  {id:'spark', label:'✦  Spark', svg:'<path d="M48 4c4 30 14 40 44 46-30 6-40 16-44 46-4-30-14-40-44-46 30-6 40-16 44-46Z"/>'},
+  {id:'infinity', label:'∞  Infinity', svg:'<path d="M48 50C38 36 30 30 20 30 8 30 2 39 2 50s6 20 18 20c10 0 18-6 28-20s18-20 28-20c12 0 18 9 18 20s-6 20-18 20c-10 0-18-6-28-20Z"/>'},
+  {id:'saucer', label:'⊛  Saucer', svg:'<ellipse cx="48" cy="58" rx="44" ry="13"/><path d="M26 50c0-14 10-24 22-24s22 10 22 24M36 80l-8 14M60 80l8 14"/>'},
+  {id:'none', label:'Wordmark only', svg:''},
 ];
+const symbolMarkup=id=>SYMBOLS.find(sym=>sym.id===id)?.svg??'';
 export const DEFAULT = {version:1, text:'DARKSKY', tagline:'FORGE YOUR SIGNATURE', font:'krypton', tracking:7, size:104, color:'#c5a3ff', accent:'#67e8df', background:'#090c15', symbol:'brackets', transparent:false, glyphs:{}, metrics:{}, kerning:{}, ligatures:{}, fontName:'Darksky Custom'};
 export const escapeXML = (s) => String(s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]));
 export const safeName = (s) => String(s).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-|-$/g,'').slice(0,64)||'darksky-design';
@@ -32,7 +54,7 @@ export function validateProject(value) {
   s.font=value.font;
   for(const key of ['color','accent','background']) { if(!/^#[0-9a-f]{6}$/i.test(value[key])) throw Error('Invalid project colour.'); s[key]=value[key]; }
   for(const [key,min,max] of [['tracking',-10,30],['size',40,180]]) { if(!Number.isFinite(value[key])||value[key]<min||value[key]>max) throw Error(`Invalid ${key}.`); s[key]=value[key]; }
-  if(!['brackets','orbit','diamond','none'].includes(value.symbol)) throw Error('Unknown symbol.');
+  if(!SYMBOLS.some(sym=>sym.id===value.symbol)) throw Error('Unknown symbol.');
   s.symbol=value.symbol; s.transparent=!!value.transparent; s.glyphs={};
   if(!value.glyphs||typeof value.glyphs!=='object'||Array.isArray(value.glyphs)) throw Error('Invalid glyph data.');
   const entries=Object.entries(value.glyphs);
@@ -94,7 +116,7 @@ export function composeSVG(font,state) {
   const height=Math.ceil(Math.max(240,b.y2-b.y1+160));
   const x=64+symbolSpace+(blockWidth-(b.x2-b.x1))/2-b.x1;
   const y=(height-(b.y2-b.y1))/2-b.y1-(tagline?16:0);
-  const symbol={brackets:'<path d="M28 4 4 28v44l24 24M68 4l24 24v44L68 96M59 18 37 82"/>',orbit:'<ellipse cx="48" cy="50" rx="45" ry="19" transform="rotate(-45 48 50)"/><circle cx="48" cy="50" r="28"/><path d="M48 5v15M48 80v15"/>',diamond:'<path d="m48 3 45 47-45 47L3 50Z M48 25 72 50 48 75 24 50Z"/>',none:''}[state.symbol];
+  const symbol=symbolMarkup(state.symbol);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXML(state.text)} logo"><title>${escapeXML(state.text)} — DarkskyForge</title>${state.transparent?'':`<rect width="100%" height="100%" fill="${state.background}"/>`}<g fill="none" stroke="${state.accent}" stroke-width="4" stroke-linecap="square" transform="translate(64 ${height/2-56})">${symbol}</g><path fill="${state.color}" transform="translate(${x} ${y})" d="${word.toPathData({decimalPlaces:3,flipY:false})}"/>${tagline?`<path fill="${state.accent}" opacity=".85" transform="translate(${64+symbolSpace+(blockWidth-(t.x2-t.x1))/2-t.x1} ${y+b.y2+36})" d="${tagline.toPathData({decimalPlaces:3,flipY:false})}"/>`:''}</svg>`;
 }
 export function buildFont(font,state,license) {

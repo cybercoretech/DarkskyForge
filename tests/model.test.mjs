@@ -48,3 +48,24 @@ test('Outlines use source units per em, preserving the original glyph scale',()=
  const expected=font.getPath('D',0,0,104).getBoundingBox();
  assert.deepEqual(actual,expected);
 });
+
+test('Every bundled typeface parses, carries its licence and draws the default logo',async()=>{
+ const {FONT_LIBRARY,FONT_GROUPS}=await import('../src/model.js');
+ assert.ok(FONT_LIBRARY.length>=27);
+ for(const f of FONT_LIBRARY){
+  assert.ok(FONT_GROUPS.includes(f.group),`${f.id} group`);
+  const b=fs.readFileSync(`public${f.url}`),parsed=ot.parse(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength));
+  assert.equal(readLicense(fs.readFileSync(`public${f.license}`,'utf8')).ofl,true,`${f.id} licence`);
+  assert.match(composeSVG(parsed,{...DEFAULT,font:f.id}),/<path fill=/,`${f.id} renders`);
+ }
+});
+
+test('Every symbol validates and renders as stroked outlines',async()=>{
+ const {SYMBOLS}=await import('../src/model.js');
+ assert.ok(SYMBOLS.length>=18);
+ for(const s of SYMBOLS){
+  const state=validateProject({...DEFAULT,symbol:s.id}),svg=composeSVG(font,state);
+  if(s.id==='none')assert.match(svg,/stroke-width="4"[^>]*><\/g>/,'wordmark-only draws an empty symbol group');else assert.ok(svg.includes(s.svg),`${s.id} drawn`);
+ }
+ assert.throws(()=>validateProject({...DEFAULT,symbol:'<script>'}));
+});

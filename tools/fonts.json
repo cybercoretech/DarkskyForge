@@ -1,0 +1,256 @@
+{
+  "comment": "Bundled typefaces. tools/fetch-fonts.mjs downloads each one (Fontsource, latin subset, WOFF) with its licence into public/fonts, verifies it and writes src/font-library.js. Only SIL OFL 1.1 fonts: the app's export path enforces OFL rules.",
+  "groups": [
+    "Code · mono",
+    "Techno · display",
+    "Pixel · retro",
+    "Clean · sans"
+  ],
+  "fonts": [
+    {
+      "id": "krypton",
+      "name": "Monaspace Krypton",
+      "style": "ExtraBold · mechanical / mono",
+      "group": "Code · mono",
+      "builtin": {
+        "url": "/fonts/krypton.woff",
+        "license": "/fonts/OFL-Monaspace.txt"
+      }
+    },
+    {
+      "id": "jetbrains",
+      "name": "JetBrains Mono",
+      "style": "Bold · precise / mono",
+      "group": "Code · mono",
+      "builtin": {
+        "url": "/fonts/jetbrains-bold.ttf",
+        "license": "/fonts/OFL-JetBrains.txt"
+      }
+    },
+    {
+      "id": "fira-code",
+      "name": "Fira Code",
+      "style": "Bold · ligature-rich / mono",
+      "group": "Code · mono",
+      "pkg": "fira-code",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "ibm-plex-mono",
+      "name": "IBM Plex Mono",
+      "style": "Bold · corporate-engineered / mono",
+      "group": "Code · mono",
+      "pkg": "ibm-plex-mono",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "space-mono",
+      "name": "Space Mono",
+      "style": "Bold · retro-futurist / mono",
+      "group": "Code · mono",
+      "pkg": "space-mono",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "martian-mono",
+      "name": "Martian Mono",
+      "style": "ExtraBold · wide / mono",
+      "group": "Code · mono",
+      "pkg": "martian-mono",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "geist-mono",
+      "name": "Geist Mono",
+      "style": "ExtraBold · Swiss-clean / mono",
+      "group": "Code · mono",
+      "pkg": "geist-mono",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "victor-mono",
+      "name": "Victor Mono",
+      "style": "Bold · slender / mono",
+      "group": "Code · mono",
+      "pkg": "victor-mono",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "orbitron",
+      "name": "Orbitron",
+      "style": "Black · orbital geometric",
+      "group": "Techno · display",
+      "pkg": "orbitron",
+      "version": "5.3.0",
+      "weight": 900
+    },
+    {
+      "id": "audiowide",
+      "name": "Audiowide",
+      "style": "Regular · velocity sci-fi",
+      "group": "Techno · display",
+      "pkg": "audiowide",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "oxanium",
+      "name": "Oxanium",
+      "style": "ExtraBold · angular cyber",
+      "group": "Techno · display",
+      "pkg": "oxanium",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "chakra-petch",
+      "name": "Chakra Petch",
+      "style": "Bold · cut-corner tech",
+      "group": "Techno · display",
+      "pkg": "chakra-petch",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "michroma",
+      "name": "Michroma",
+      "style": "Regular · wide aerospace",
+      "group": "Techno · display",
+      "pkg": "michroma",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "exo-2",
+      "name": "Exo 2",
+      "style": "ExtraBold · futurist sans",
+      "group": "Techno · display",
+      "pkg": "exo-2",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "rajdhani",
+      "name": "Rajdhani",
+      "style": "Bold · condensed squared",
+      "group": "Techno · display",
+      "pkg": "rajdhani",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "tomorrow",
+      "name": "Tomorrow",
+      "style": "ExtraBold · cyberpunk grotesk",
+      "group": "Techno · display",
+      "pkg": "tomorrow",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "russo-one",
+      "name": "Russo One",
+      "style": "Regular · heavy machine",
+      "group": "Techno · display",
+      "pkg": "russo-one",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "saira-stencil",
+      "name": "Saira Stencil One",
+      "style": "Regular · stencil plate",
+      "group": "Techno · display",
+      "pkg": "saira-stencil-one",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "bungee",
+      "name": "Bungee",
+      "style": "Regular · signage block",
+      "group": "Techno · display",
+      "pkg": "bungee",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "major-mono",
+      "name": "Major Mono Display",
+      "style": "Regular · geometric oddity",
+      "group": "Techno · display",
+      "pkg": "major-mono-display",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "vt323",
+      "name": "VT323",
+      "style": "Regular · terminal phosphor",
+      "group": "Pixel · retro",
+      "pkg": "vt323",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "silkscreen",
+      "name": "Silkscreen",
+      "style": "Bold · crisp pixel",
+      "group": "Pixel · retro",
+      "pkg": "silkscreen",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "press-start",
+      "name": "Press Start 2P",
+      "style": "Regular · 8-bit arcade",
+      "group": "Pixel · retro",
+      "pkg": "press-start-2p",
+      "version": "5.3.0",
+      "weight": 400
+    },
+    {
+      "id": "space-grotesk",
+      "name": "Space Grotesk",
+      "style": "Bold · quirky grotesk",
+      "group": "Clean · sans",
+      "pkg": "space-grotesk",
+      "version": "5.3.0",
+      "weight": 700
+    },
+    {
+      "id": "unbounded",
+      "name": "Unbounded",
+      "style": "ExtraBold · wide rounded",
+      "group": "Clean · sans",
+      "pkg": "unbounded",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "sora",
+      "name": "Sora",
+      "style": "ExtraBold · tech-brand sans",
+      "group": "Clean · sans",
+      "pkg": "sora",
+      "version": "5.3.0",
+      "weight": 800
+    },
+    {
+      "id": "syne",
+      "name": "Syne",
+      "style": "ExtraBold · art-house display",
+      "group": "Clean · sans",
+      "pkg": "syne",
+      "version": "5.3.0",
+      "weight": 800
+    }
+  ]
+}

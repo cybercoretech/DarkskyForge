@@ -2,7 +2,7 @@ import {typography} from './typography.js';
 import * as opentype from 'opentype.js/dist/opentype.mjs';
 import {zipSync,strToU8} from 'fflate';
 import {otfToTtf,toWoff2} from './fontformats.js';
-import {DEFAULT,FONT_LIBRARY,readLicense,validateProject,composeSVG,buildFont,glyphCommands,pathFrom,safeName,escapeXML} from './model.js';
+import {DEFAULT,FONT_LIBRARY,FONT_GROUPS,SYMBOLS,readLicense,validateProject,composeSVG,buildFont,glyphCommands,pathFrom,safeName,escapeXML} from './model.js';
 
 const $=s=>document.querySelector(s);
 let state=structuredClone(DEFAULT),font,license,fontBytes,customSource=null,svg='',undo=[],redo=[],mode='logo';
@@ -104,7 +104,7 @@ function setMode(next){mode=next;for(const m of ['logo','glyph','theme'])$('#'+m
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 function showInfo(title,text){$('#dialog-title').textContent=title;$('#dialog-content').textContent=text;$('#info-dialog').showModal();}
 $('#close-dialog').onclick=()=>$('#info-dialog').close();$('#view-license').onclick=()=>showInfo('Font licence',license.text);
-$('#about-button').onclick=()=>showInfo('DarkskyForge','An open creative toolkit by Darkstardevx / Cybercore.\n\nFonts and projects are processed on your device. No accounts, analytics, tracking, or uploaded documents. Browser storage holds your current built-in-font project and custom themes. Imported fonts stay in this session; save a project file to keep them.\n\nFonts: Monaspace Krypton by GitHub, and JetBrains Mono. SIL OFL 1.1. Use Read font licence for the complete original text.\n\nTechnology: Cybercore (MIT), opentype.js (MIT), fflate (MIT), brotli-wasm (Apache-2.0) with Google Brotli (MIT), Vite (MIT).\n\nFont exports are renamed subsets (OTF, TTF and/or WOFF2) containing your composition characters and edited glyphs. Custom kerning and ligatures are included. Source hinting and other advanced shaping are not retained.\n\nhttps://github.com/cybercoretech/DarkskyForge\nhttps://openfontlicense.org/ofl-faq/');
+$('#about-button').onclick=()=>showInfo('DarkskyForge','An open creative toolkit by Darkstardevx / Cybercore.\n\nFonts and projects are processed on your device. No accounts, analytics, tracking, or uploaded documents. Browser storage holds your current built-in-font project and custom themes. Imported fonts stay in this session; save a project file to keep them.\n\nFonts: '+FONT_LIBRARY.length+' open-source typefaces, each under the SIL Open Font License 1.1 and shipped with its licence. Use Read font licence for the complete original text.\n\nTechnology: Cybercore (MIT), opentype.js (MIT), fflate (MIT), brotli-wasm (Apache-2.0) with Google Brotli (MIT), Vite (MIT).\n\nFont exports are renamed subsets (OTF, TTF and/or WOFF2) containing your composition characters and edited glyphs. Custom kerning and ligatures are included. Source hinting and other advanced shaping are not retained.\n\nhttps://github.com/cybercoretech/DarkskyForge\nhttps://openfontlicense.org/ofl-faq/');
 
 // Glyph lab: source coordinates are kept in font units, independent of preview scale.
 function character(){return [...$('#glyph-character').value][0]||'D';}
@@ -228,7 +228,12 @@ async function startThemes(){
     themeOptions();currentTheme=structuredClone(allThemes.find(t=>t.metadata.id==='cybergrid')||allThemes[0]);$('#theme-select').value=currentTheme.metadata.id;refreshTheme();$('#engine-state').textContent=`${allThemes.length} THEMES / ENGINE READY`;
   }catch(e){$('#engine-state').textContent='ENGINE UNAVAILABLE';for(const id of ['save-theme','export-theme','export-family','import-pack','use-theme-colors'])$('#'+id).disabled=true;tell('Theme engine failed to load: '+(e.message||e),true);}
 }
+function fontOptions(){
+  const select=$('#font-select');select.replaceChildren();
+  for(const group of FONT_GROUPS){const og=document.createElement('optgroup');og.label=group;for(const f of FONT_LIBRARY.filter(f=>f.group===group))og.append(new Option(`${f.name} / ${f.style.split(' · ')[0]}`,f.id));if(og.children.length)select.append(og);}
+}
 async function start(){
+  fontOptions();$('#symbol').replaceChildren(...SYMBOLS.map(sym=>new Option(sym.label,sym.id)));
   try{const saved=localStorage.getItem(storeKey);if(saved)state=validateProject(JSON.parse(saved));}catch{tell('Saved project could not be loaded. Starting a new composition.',true);}
   try{await loadFont(state.font);render();document.body.dataset.ready='true';}catch(e){tell('Could not load the typeface: '+e.message,true);}
 }

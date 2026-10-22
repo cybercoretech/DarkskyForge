@@ -88,3 +88,28 @@ test('Font export writes OTF, TTF and WOFF2 that the browser font sanitizer acce
  }
  expect(errors).toEqual([]);
 });
+
+test('Typeface and symbol pickers list the bundled library and redraw the logo',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ expect(await page.locator('#font-select optgroup').count()).toBe(4);
+ expect(await page.locator('#font-select option').count()).toBeGreaterThanOrEqual(27);
+ expect(await page.locator('#symbol option').count()).toBeGreaterThanOrEqual(18);
+ for(const id of ['orbitron','press-start','syne']){
+  const before=await page.locator('#logo-preview svg').innerHTML();
+  await page.locator('#font-select').selectOption(id);
+  await expect.poll(()=>page.locator('#logo-preview svg').innerHTML()).not.toBe(before);
+ }
+ await page.locator('#symbol').selectOption('saucer');await expect.poll(()=>page.locator('#logo-preview svg ellipse').count()).toBeGreaterThan(0);
+ expect(await page.locator('#logo-preview svg ellipse').count()).toBeGreaterThan(0);
+ await page.reload();await expect(page.locator('#font-select')).toHaveValue('syne');await expect(page.locator('#symbol')).toHaveValue('saucer');
+ expect(errors).toEqual([]);
+});
+
+test('The universal Cybercore contact block loads under the site CSP',async({page})=>{
+ const violations=[];page.on('console',m=>{if(/Content Security Policy/i.test(m.text()))violations.push(m.text());});
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ await page.waitForFunction(()=>(document.querySelector('cybercore-contact')?.shadowRoot?.textContent||'').includes('dev@cybercoretech.net'),null,{timeout:20000});
+ await expect(page.locator('cybercore-contact')).toHaveAttribute('repo','DarkskyForge');
+ expect(violations).toEqual([]);
+});

@@ -1,0 +1,110 @@
+{
+  "krypton": {
+    "font": "90074bd1cf4d3f4b58084cf7ea8327be339f1509de6fb955c9592502f6c18462",
+    "license": "0e84e5f7dd6f05e74a00f2fb828ca43e489d954f5509ff0fa439ea18c0d35fe9"
+  },
+  "jetbrains": {
+    "font": "d22c4f3821d725eb01210d278d95dfcfcaadc34699a06658d47c8a5cc5830ada",
+    "license": "a76abf002c49097d146e86740a3105a5d00450b1592e820a1109a8c5680cd697"
+  },
+  "fira-code": {
+    "font": "00306519b47d03b24dc2a917c0fc796d3ccd3abdafa8d7b3755ce26c95a7b616",
+    "license": "126cd7bf732b86f42885f1fbf682e6aeea456672c7fdb99f2d557ec44e468a28"
+  },
+  "ibm-plex-mono": {
+    "font": "595e0cbaa671f5276f5fdcac6113c30b2386f247f61cb42fc81f5096631a51e4",
+    "license": "23b0a9d0c6d3f140a0b77e483c5cfa6bba574325ef5cb189ed9f2fec4884533f"
+  },
+  "space-mono": {
+    "font": "8cdde79ffa85d2b11cd81a8c8f8fee3708607f76acd07172150b9851723fdd0e",
+    "license": "761663b7fb7667764f42243f9b1b2bcfccf41b158a7ab508bed4961dcf377eab"
+  },
+  "martian-mono": {
+    "font": "245617d60b258b4d610ac0c97dcdfb39874d1481727e17873939a51f11924979",
+    "license": "bd7d799f6a67b704f9546422ee83d69b4dc5e4ae289d5eabc22581251dd7150a"
+  },
+  "geist-mono": {
+    "font": "d3226faf7e02d001e4dfc63e64c533a2e105b6ffa5df9b180bca65f08d207119",
+    "license": "cc815ed4fc045f0e991abb10395b7932bd028c6a067deb13316d6002105074e6"
+  },
+  "victor-mono": {
+    "font": "031ca67f8ebc0d000a06a7179cdb03f9fa2bfd55493cf5d0d36de8592123f094",
+    "license": "3572d1865e9aad67cb0c06b2c3b25dcc6cef0000e40a3a45d9f7c182665c1c77"
+  },
+  "orbitron": {
+    "font": "d85a2d2e0c8eb3badf419f27b29e8ac8517d84999bcecd609774a421de26b938",
+    "license": "075b0137b7a19be521031442001478342ebafc1923f01092b8dc51afc4341041"
+  },
+  "audiowide": {
+    "font": "eea4fbef723737d9c9f02ac1dadb23a81950e70a58b035c8e5d1842dfb02d7ec",
+    "license": "15732585cd77950a8e12461202dd46297b2cf75ec70acf652a38849db9341c79"
+  },
+  "oxanium": {
+    "font": "dc068d8602fb9e99638c791990e38108b48cf1424d404613cc60a40432d6ba1c",
+    "license": "062fa183baec494d989d5d848f78a5466a537033c40f1b7651c19ca5d140ab7c"
+  },
+  "chakra-petch": {
+    "font": "ebff5565a21091177d1a15326e959db4e51b324851d4ba13ee45398d06d9116f",
+    "license": "8f32c96ea465c5916489845361238b31b365414228bc2e4e45e3ae98ba1d311a"
+  },
+  "michroma": {
+    "font": "bd6218f6b39b65298b2eff876d99f15bbb0181c813f1fa9bb823bc095fc80c9c",
+    "license": "9d869414cd2df4c69abadbada93d27865c7b0df7d276bb2fe1abfd46288cb093"
+  },
+  "exo-2": {
+    "font": "4342b2a2ece5cc501c145b30e0e87cac86af8d7625f6885350a8067049d9ed79",
+    "license": "7644b74e07215f62af4ebbfcf2b0f06a428d70d32c41e751fba93763a683c3f5"
+  },
+  "rajdhani": {
+    "font": "e4e5272051a3882943fa3bdf5cda8eca8c1853ac66c1572eb90fda8608d9bd31",
+    "license": "078e327eb00525214cdce9780cfdf156141f137f1a095bec9798f470703d7d2d"
+  },
+  "tomorrow": {
+    "font": "4cbb2aa1526aa96289e10b6251d4a16c1de9250bc2f663afd4af12fc8486b1d0",
+    "license": "2f396c9fd6aadd9c0951c06333e079f415a91f66a6e07682bd19b314135c8172"
+  },
+  "russo-one": {
+    "font": "e71371cdf766e09640a98917550c8b1517236ea897ac6b0fbbf5d30886344100",
+    "license": "e01a0e5a1112dec6cc8b84fa2ee80093125f152671bcd7c321058da3856d9909"
+  },
+  "saira-stencil": {
+    "font": "a9dac1468207c3951c8dbf344bf79f4337a589df78effdcbec365016c4b26ef0",
+    "license": "2a56816161921a4144c3569c272d36b40f4967eb69b811e5170d1f4325e20da6"
+  },
+  "bungee": {
+    "font": "ce965f529c48def2baf2447acafc3bdc2eba88c916e38d713a542a3a9eb36837",
+    "license": "1256e1025d54b27c033b5a1335a5b99a64ea5e6cdfd5805829128baaf0a47804"
+  },
+  "major-mono": {
+    "font": "f4ad0176b9b27508cd090c9200fbf617e0d947a57eccb34305f98c8e32c5e8e6",
+    "license": "ebeb954bd4d93d234b0fb6a4762a9c7492dd5084c99f5c1f29a1b59c8a43cca3"
+  },
+  "vt323": {
+    "font": "4bf46256dbaa7b6531febc80268b117fb6f71a56ccd9f859de9211b06fd5337c",
+    "license": "27d9af34210253e7ca1251fbace86c6f65b40031d6ce1a75493a1b2093631298"
+  },
+  "silkscreen": {
+    "font": "63a711d83f4e3c08b72002a263df9fff79c606d42960bf7e6dc218e733ae3371",
+    "license": "5e647e94c4b72dc6c92dabfabb3c32225fbeff0f5f9e38db93c118b5bcb85d0c"
+  },
+  "press-start": {
+    "font": "5639ed14ba3e96401f71dcf399e6e64bbcfa4110250d61ba6a9fcb969c9cc74f",
+    "license": "98e451fe911e5ee4a1a45359535dc30ea7df28b8d9a9cd1f741778efab1387ee"
+  },
+  "space-grotesk": {
+    "font": "145016049aa47932e2d116f70151edc5a53df894cb367514c52ea2d11289bee7",
+    "license": "18a4de52385f6b988782639d5d0cc1326e5a8c2de9a7f01d7b20d9aedcc60943"
+  },
+  "unbounded": {
+    "font": "48aa6ed1bbcceae198ec4366bfb948731642fee80d08e08d20594ebe256d743a",
+    "license": "48a780bc857729859e54d1e691b05792894a26634edc1c4b5dbeabffe6941758"
+  },
+  "sora": {
+    "font": "0ca07cd14c5741c712465747fba809b6075b092a5d269031a9337704cd05a2c4",
+    "license": "1ec9623d38c445eb4dfe5fcc783e0f0ee728cc97ca157ce1f8cb2b3bf9d9b0d9"
+  },
+  "syne": {
+    "font": "c1ea128f1d5149a082d0f40c3d6855a74c2e01d8f213e4ded030d6e5a703f1d3",
+    "license": "ea775d83f01ecd45fc622fa5db568fad99c9338192594c3719a52b78bab91e44"
+  }
+}
