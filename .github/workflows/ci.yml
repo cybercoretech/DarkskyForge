@@ -17,6 +17,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate font exports with fontTools
+        run: |
+          pip install fonttools==4.67.0 brotli==1.2.0
+          npm run test:fonts
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: npm run build

@@ -66,3 +66,25 @@ test('Imported OFL font projects reopen, invalid fonts and theme packs do not mu
  const dl=page.waitForEvent('download');await page.locator('#save-project').click();const path=await(await dl).path();await page.reload();await page.locator('#project-file').setInputFiles(path);await expect(page.locator('#font-select')).toHaveValue('custom');await expect(page.locator('#logo-preview svg')).toBeVisible();
  await page.getByRole('button',{name:/03 Theme studio/}).click();await expect(page.locator('#engine-state')).toContainText('ENGINE READY');const before=await page.locator('#theme-select option').count();await page.locator('#pack-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"format_version":999}')});await expect(page.locator('#status')).not.toBeEmpty();expect(await page.locator('#theme-select option').count()).toBe(before);
 });
+
+test('Font export writes OTF, TTF and WOFF2 that the browser font sanitizer accepts',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ await page.getByRole('button',{name:/02 Glyph lab/}).click();
+ await page.locator('#font-name').fill('Format Test');
+ for(const id of ['#format-otf','#format-ttf','#format-woff2'])await page.locator(id).uncheck();
+ await page.locator('#export-font').click();await expect(page.locator('#status')).toContainText('at least one font format');
+ for(const id of ['#format-otf','#format-ttf','#format-woff2'])await page.locator(id).check();
+ const dl=page.waitForEvent('download');await page.locator('#export-font').click();
+ const files=unzipSync(fs.readFileSync(await(await dl).path()));
+ expect(Object.keys(files)).toEqual(expect.arrayContaining(['format-test.otf','format-test.ttf','format-test.woff2','format-test.css','OFL.txt']));
+ expect(strFromU8(files['format-test.css'])).toMatch(/url\("format-test\.woff2"\) format\("woff2"\)/);
+ const ttf=files['format-test.ttf'];expect(ot.parse(ttf.buffer.slice(ttf.byteOffset,ttf.byteOffset+ttf.byteLength)).outlinesFormat).toBe('truetype');
+ // Chrome runs every web font through its OTS sanitizer and rejects malformed files.
+ for(const [name,type] of [['format-test.ttf','font/ttf'],['format-test.woff2','font/woff2']]){
+  const result=await page.evaluate(async([b64,label])=>{const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const face=new FontFace(label,bytes);try{await face.load();}catch(e){return 'rejected: '+e.message;}document.fonts.add(face);
+   const c=document.createElement('canvas').getContext('2d');c.font=`48px "${label}", monospace`;const ours=c.measureText('DARKSKY').width;c.font='48px monospace';return face.status+' '+(ours!==c.measureText('DARKSKY').width);},[Buffer.from(files[name]).toString('base64'),'Check'+type.replace(/\W/g,'')]);
+  expect(result,`${name} must load as a web font`).toBe('loaded true');
+ }
+ expect(errors).toEqual([]);
+});

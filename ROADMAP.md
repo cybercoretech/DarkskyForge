@@ -27,11 +27,12 @@ Evaluate [ttfautohint](https://freetype.org/ttfautohint/) compiled to WASM in a 
 for TrueType outputs and a separate CFF/PostScript hinter for OTF. Validate hinted
 fonts with independent parsers/sanitizers and size-by-size rendering comparisons.
 
-Current export is CFF OpenType (`.otf`). Do not rename that file to `.ttf` or `.woff2`.
-TrueType needs quadratic conversion and glyf/loca generation. WOFF2 needs an actual
-encoder, such as a WASM build of [Google's woff2](https://github.com/google/woff2),
-plus round-trip checks. Keep compilation cancellable and off the UI thread as
-font sizes grow. [opentype.js](https://github.com/opentypejs/opentype.js) provides
+Done: OTF (CFF), TTF (quadratic `glyf`/`loca` conversion in `src/fontformats.js`) and
+WOFF2 (our own container writer with untransformed `glyf`/`loca` plus Brotli from
+`brotli-wasm`, loaded only when needed; about 5% larger than Google's encoder, which
+also rewrites glyph data, but it runs under the strict CSP with no runtime code
+generation), with fontTools validation in CI and browser-sanitizer checks. Still to do:
+keep compilation cancellable and off the UI thread as font sizes grow. [opentype.js](https://github.com/opentypejs/opentype.js) provides
 our parser and OTF/GSUB writer; the app writes a standard kern table separately.
 
 ## Font-provider imports
