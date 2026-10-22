@@ -37,11 +37,21 @@ our parser and OTF/GSUB writer; the app writes a standard kern table separately.
 
 ## Font-provider imports
 
-Local OFL imports work now. A Google Fonts browser should fetch a font together
-with its upstream licence and provenance. The [Developer API](https://developers.google.com/fonts/docs/developer_api)
-requires a key; a curated, versioned catalogue from google/fonts is an alternative
-that avoids embedding an account key in a public app. Support variable fonts and
-WOFF2 before promising every Google family.
+Done:
+- Local OFL imports, and a Google Fonts browser over a curated catalogue pinned to one
+  google/fonts commit. It's built from the public git tree and
+  fonts.google.com/metadata/fonts, so no account key sits in the public app.
+- Each import fetches the family's own `OFL.txt` and must pass the app's OFL check.
+- Projects keep the pinned reference; exports record the source URL and commit.
+- Apache and UFL families are left out, because export enforces OFL rules.
+
+Still to do:
+- Variable-font instancing: pick axis values instead of the default instance.
+- Font previews in the browser list (each would need a font download).
+- Pre-checking every family's licence for ambiguous Reserved Font Names: today that
+  is caught at export.
+- A scheduled catalogue refresh: re-run the builder with a new commit and review the
+  diff.
 
 Adobe Fonts is not an open-source font catalogue. Its [licensing terms](https://helpx.adobe.com/fonts/web/font-licensing/font-licensing.html)
 must be checked for the exact use; do not treat subscription font access as

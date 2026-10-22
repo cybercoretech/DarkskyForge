@@ -22,6 +22,14 @@ WebAssembly engine on the same origin.
   Exports are checked by fontTools in CI and by Chrome's font sanitizer in the browser tests.
 - Live `@font-face` preview with size and light/dark controls. This uses the actual
   current browser/OS renderer, not an imitation of ClearType or macOS.
+- Google Fonts browser: 1,679 OFL families with a Latin subset.
+  - Search by name or designer, filter by category, pick a style.
+  - The font and its `OFL.txt` download straight from the google/fonts repository at a
+    pinned commit (`public/google-fonts/catalog.json`, built by
+    `tools/build-google-catalog.mjs`; no API key).
+  - Projects store the pinned reference, so a Google font survives a reload.
+  - Exports record the source URL and commit.
+  - Variable fonts are edited at their default instance and exported as static fonts.
 - Local TTF/OTF/WOFF imports accompanied by an OFL 1.1 licence. WOFF2 and other
   licences are not yet supported. Reserved names are checked before font export.
 - Project saving via File System Access where supported, with a download fallback.

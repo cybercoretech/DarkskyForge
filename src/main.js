@@ -2,10 +2,10 @@ import {typography} from './typography.js';
 import * as opentype from 'opentype.js/dist/opentype.mjs';
 import {zipSync,strToU8} from 'fflate';
 import {otfToTtf,toWoff2} from './fontformats.js';
-import {DEFAULT,FONT_LIBRARY,FONT_GROUPS,SYMBOLS,readLicense,validateProject,composeSVG,buildFont,glyphCommands,pathFrom,safeName,escapeXML} from './model.js';
+import {DEFAULT,FONT_LIBRARY,FONT_GROUPS,SYMBOLS,googleFontRef,googleFontURL,readLicense,validateProject,composeSVG,buildFont,glyphCommands,pathFrom,safeName,escapeXML} from './model.js';
 
 const $=s=>document.querySelector(s);
-let state=structuredClone(DEFAULT),font,license,fontBytes,customSource=null,svg='',undo=[],redo=[],mode='logo';
+let state=structuredClone(DEFAULT),font,license,fontBytes,customSource=null,googleRef=null,googleCatalog=null,googlePick=null,svg='',undo=[],redo=[],mode='logo';
 let fileHandle=null,typographyTools;
 let selectedPoint=null,drawPoints=[],dragging=null,glyphBefore=null,loadSequence=0;
 const fontCache=new Map();
@@ -30,6 +30,19 @@ async function loadFont(id){
   const sequence=++loadSequence;
   let source;
   if(id==='custom'){if(!customSource)throw Error('Reopen the saved project or import the custom font again.');source=customSource;}
+  else if(id==='google'){
+    if(!googleRef)throw Error('Choose a Google Fonts family again.');
+    const key=`google:${googleRef.commit}/${googleRef.dir}/${googleRef.file}`;
+    if(!fontCache.has(key)){
+      const responses=await Promise.all([fetch(googleFontURL(googleRef)),fetch(googleFontURL(googleRef,'OFL.txt'))]);
+      if(responses.some(r=>!r.ok))throw Error('Google Fonts download failed. Check your connection and try again.');
+      const [bytes,text]=await Promise.all([responses[0].arrayBuffer(),responses[1].text()]);
+      if(bytes.byteLength>4*1024*1024)throw Error('This font file is too large to edit here.');
+      const lic=readLicense(text);if(!lic.ofl)throw Error('This family does not ship a complete SIL OFL 1.1 licence.');
+      fontCache.set(key,{bytes,license:lic});
+    }
+    source=fontCache.get(key);
+  }
   else {
     if(!fontCache.has(id)){
       const meta=FONT_LIBRARY.find(f=>f.id===id);if(!meta)throw Error('Unknown font.');
@@ -47,7 +60,8 @@ function blobDownload(name,blob){const url=URL.createObjectURL(blob),a=document.
 function zipDownload(name,files){blobDownload(name,new Blob([zipSync(files)],{type:'application/zip'}));}
 function projectData(){const data={...structuredClone(state),fontLicense:license.text};if(state.font==='custom'){const bytes=new Uint8Array(fontBytes);let raw='';for(let i=0;i<bytes.length;i+=8192)raw+=String.fromCharCode(...bytes.subarray(i,i+8192));data.sourceFont={data:btoa(raw),license:license.text};}return data;}
 function projectJSON(){return JSON.stringify(projectData(),null,2);}
-function licenseFiles(){return {'OFL.txt':strToU8(license.text),'README.txt':strToU8(`Created with DarkskyForge\nhttps://github.com/cybercoretech/DarkskyForge\n\nSource typeface: ${FONT_LIBRARY.find(f=>f.id===state.font)?.name||'Imported font'}\nThe original font licence is included in OFL.txt. Logo artwork is your creation; including this licence does not put your artwork under OFL. A generated font subset remains under OFL.\n`)};}
+function sourceDescription(){if(state.font==='google'&&googleRef)return `${googleRef.family} ${googleRef.style}, Google Fonts\n  ${googleFontURL(googleRef)}\n  (google/fonts commit ${googleRef.commit})`;return FONT_LIBRARY.find(f=>f.id===state.font)?.name||'Imported font';}
+function licenseFiles(){return {'OFL.txt':strToU8(license.text),'README.txt':strToU8(`Created with DarkskyForge\nhttps://github.com/cybercoretech/DarkskyForge\n\nSource typeface: ${sourceDescription()}\nThe original font licence is included in OFL.txt. Logo artwork is your creation; including this licence does not put your artwork under OFL. A generated font subset remains under OFL.\n`)};}
 async function pngBytes(source,scale){
   const image=new Image(),url=URL.createObjectURL(new Blob([source],{type:'image/svg+xml'}));
   try{image.src=url;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.width*scale;canvas.height=image.height*scale;if(canvas.width>16384||canvas.width*canvas.height>32000000)throw Error('This image is too large. Lower the PNG scale or shorten the wordmark.');const context=canvas.getContext('2d');context.drawImage(image,0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('PNG export failed.');return new Uint8Array(await blob.arrayBuffer());}finally{URL.revokeObjectURL(url);}
@@ -75,10 +89,47 @@ $('#project-file').onchange=run(async e=>{
     const bytes=Uint8Array.from(atob(value.sourceFont.data),c=>c.charCodeAt(0)).buffer,lic=readLicense(value.sourceFont.license);
     if(!lic.ofl)throw Error('This project has an unsupported font licence.');opentype.parse(bytes.slice(0));imported={bytes,license:lic};
   }
-  remember();fileHandle=null;$('#save-local').textContent='Save to local file…';if(imported){customSource=imported;ensureCustomOption();}await loadFont(next.font);state=next;render();tell('Project opened.');e.target.value='';
+  remember();fileHandle=null;$('#save-local').textContent='Save to local file…';if(imported){customSource=imported;ensureCustomOption();}if(next.font==='google'){googleRef=next.googleFont;ensureGoogleOption(googleRef);}await loadFont(next.font);state=next;render();tell('Project opened.');e.target.value='';
 });
+function ensureGoogleOption(ref){let o=$('#font-select option[value="google"]');if(!o){o=new Option('','google');$('#font-select').add(o);}o.textContent=`${ref.family} / ${ref.style} · Google Fonts`;}
 function ensureCustomOption(){if(!$('#font-select option[value="custom"]'))$('#font-select').add(new Option('Imported typeface / local','custom'));}
-$('#import-font').onclick=()=>$('#font-dialog').showModal();$('#close-font-dialog').onclick=()=>$('#font-dialog').close();
+$('#import-font').onclick=()=>{$('#font-dialog').showModal();openGoogleFonts().catch(e=>{$('#gf-count').textContent=e.message;});};$('#close-font-dialog').onclick=()=>$('#font-dialog').close();
+// Google Fonts browser: a pinned catalogue (tools/build-google-catalog.mjs).
+async function openGoogleFonts(){
+  if(!googleCatalog){
+    $('#gf-count').textContent='Loading the catalogue…';
+    const r=await fetch('/google-fonts/catalog.json');if(!r.ok)throw Error('The Google Fonts catalogue could not be loaded.');
+    googleCatalog=await r.json();
+    for(const c of [...new Set(googleCatalog.families.map(f=>f.c))].sort())$('#gf-category').add(new Option(c,c));
+  }
+  googleResults();
+}
+function googleResults(){
+  const q=$('#gf-search').value.trim().toLowerCase(),cat=$('#gf-category').value;
+  const matches=googleCatalog.families.filter(f=>(!cat||f.c===cat)&&(!q||f.n.toLowerCase().includes(q)||f.d.toLowerCase().includes(q)));
+  $('#gf-results').replaceChildren(...matches.slice(0,60).map(f=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','option');b.setAttribute('aria-selected',String(googlePick===f));b.dataset.dir=f.dir;const name=document.createElement('span');name.textContent=f.n;const meta=document.createElement('small');meta.textContent=`${f.c} · ${f.files.length} file${f.files.length>1?'s':''}`;b.append(name,meta);b.onclick=()=>pickGoogleFamily(f);return b;}));
+  $('#gf-count').textContent=`${matches.length} of ${googleCatalog.families.length} families${matches.length>60?' · showing the 60 most popular, refine your search':''} · google/fonts@${googleCatalog.commit.slice(0,7)}`;
+}
+function pickGoogleFamily(f){
+  googlePick=f;$('#gf-pick').hidden=false;$('#gf-detail').textContent=`${f.n}${f.d?` by ${f.d}`:''} · ${f.c}`;
+  $('#gf-style').replaceChildren(...f.files.map(([file,label,size],i)=>new Option(`${label} (${Math.max(1,Math.round(size/1024))} kB)`,String(i))));
+  const regular=f.files.findIndex(([,label])=>label==='Regular'||(/^Variable ·/.test(label)));$('#gf-style').value=String(Math.max(0,regular));
+  googleStyleNote();for(const b of $('#gf-results').children)b.setAttribute('aria-selected',String(b.dataset.dir===f.dir));
+}
+function googleStyleNote(){const label=googlePick?.files[+$('#gf-style').value]?.[1]||'';$('#gf-note').textContent=label.startsWith('Variable')?'Variable font: DarkskyForge edits its default instance, and exported fonts are static.':'';}
+$('#gf-search').oninput=()=>googleCatalog&&googleResults();$('#gf-category').onchange=()=>googleCatalog&&googleResults();$('#gf-style').onchange=googleStyleNote;
+$('#gf-import').onclick=async()=>{
+  try{
+    const [file,label]=googlePick.files[+$('#gf-style').value];
+    const ref=googleFontRef({commit:googleCatalog.commit,dir:googlePick.dir,file,family:googlePick.n,style:label});
+    $('#gf-import').disabled=true;$('#gf-import').textContent='Downloading…';
+    const previous=googleRef;googleRef=ref;
+    try{await loadFont('google');}catch(e){googleRef=previous;throw e;}
+    undo=[];redo=[];ensureGoogleOption(ref);state.font='google';state.googleFont=ref;state.glyphs={};state.metrics={};state.kerning={};state.ligatures={};render();$('#font-dialog').close();$('#font-import-error').textContent='';
+    tell(`${ref.family} ${ref.style} imported from Google Fonts with its OFL licence.`);
+  }catch(e){$('#font-import-error').textContent=e.message;}
+  finally{$('#gf-import').disabled=false;$('#gf-import').textContent='Import from Google Fonts ↗';}
+};
 $('#load-custom-font').onclick=async()=>{
   try{
     const file=$('#custom-font-file').files[0],lic=$('#custom-license-file').files[0];
@@ -94,7 +145,7 @@ for(const [id,key] of [['wordmark','text'],['tagline','tagline'],['tracking','tr
   input.addEventListener('input',()=>{state[key]=input.type==='checkbox'?input.checked:input.type==='range'?Number(input.value):input.value;render();});
   input.addEventListener('change',()=>{if(input.dataset.before&&input.dataset.before!==JSON.stringify(state)){undo.push(input.dataset.before);redo=[];}input.dataset.before=JSON.stringify(state);render();});
 }
-$('#font-select').onchange=run(async e=>{const next=e.target.value;await loadFont(next);remember();state.font=next;state.glyphs={};state.metrics={};state.kerning={};state.ligatures={};render();});
+$('#font-select').onchange=run(async e=>{const next=e.target.value;await loadFont(next);remember();state.font=next;if(next==='google')state.googleFont=googleRef;else delete state.googleFont;state.glyphs={};state.metrics={};state.kerning={};state.ligatures={};render();});
 async function travel(from,to){if(!from.length)return;const next=validateProject(JSON.parse(from[from.length-1]));await loadFont(next.font);to.push(JSON.stringify(state));from.pop();state=next;selectedPoint=null;drawPoints=[];render();}
 $('#undo').onclick=run(()=>travel(undo,redo));$('#redo').onclick=run(()=>travel(redo,undo));$('#glyph-undo').onclick=run(()=>travel(undo,redo));
 $('#toggle-grid').onclick=e=>{const on=$('#artboard').classList.toggle('grid');e.target.setAttribute('aria-pressed',String(on));};
@@ -235,6 +286,7 @@ function fontOptions(){
 async function start(){
   fontOptions();$('#symbol').replaceChildren(...SYMBOLS.map(sym=>new Option(sym.label,sym.id)));
   try{const saved=localStorage.getItem(storeKey);if(saved)state=validateProject(JSON.parse(saved));}catch{tell('Saved project could not be loaded. Starting a new composition.',true);}
+  if(state.font==='google'){googleRef=state.googleFont;ensureGoogleOption(googleRef);}
   try{await loadFont(state.font);render();document.body.dataset.ready='true';}catch(e){tell('Could not load the typeface: '+e.message,true);}
 }
 await Promise.all([start(),startThemes()]);

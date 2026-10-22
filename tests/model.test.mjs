@@ -69,3 +69,22 @@ test('Every symbol validates and renders as stroked outlines',async()=>{
  }
  assert.throws(()=>validateProject({...DEFAULT,symbol:'<script>'}));
 });
+
+test('Google Fonts references are pinned, validated and cannot point anywhere else',async()=>{
+ const {googleFontRef,googleFontURL}=await import('../src/model.js');
+ const ref={commit:'45e3d5269e4a17d823f6d84470bc084dc5ae46f6',dir:'orbitron',file:'Orbitron[wght].ttf',family:'Orbitron',style:'Variable · wght'};
+ const state=validateProject({...DEFAULT,font:'google',googleFont:ref});
+ assert.deepEqual(state.googleFont,ref);
+ assert.equal(googleFontURL(ref),'https://raw.githubusercontent.com/google/fonts/45e3d5269e4a17d823f6d84470bc084dc5ae46f6/ofl/orbitron/Orbitron%5Bwght%5D.ttf');
+ assert.equal(googleFontURL(ref,'OFL.txt'),'https://raw.githubusercontent.com/google/fonts/45e3d5269e4a17d823f6d84470bc084dc5ae46f6/ofl/orbitron/OFL.txt');
+ assert.throws(()=>validateProject({...DEFAULT,font:'google'}));
+ for(const bad of [{dir:'../../etc'},{file:'x/../y.ttf'},{file:'evil.js'},{commit:'main'},{family:'<img src=x>'},{style:''}])assert.throws(()=>googleFontRef({...ref,...bad}),JSON.stringify(bad));
+});
+
+test('The Google Fonts catalogue is pinned and only lists importable OFL files',async()=>{
+ const c=JSON.parse(fs.readFileSync('public/google-fonts/catalog.json','utf8')),{GOOGLE_FONT_FILE}=await import('../src/model.js');
+ assert.match(c.commit,/^[0-9a-f]{40}$/);assert.ok(c.families.length>1500);
+ const dirs=new Set();for(const f of c.families){assert.ok(!dirs.has(f.dir));dirs.add(f.dir);for(const [file,,size] of f.files){assert.match(file,GOOGLE_FONT_FILE);assert.ok(size<=3*1024*1024);}}
+ const lato=c.families.find(f=>f.dir==='lato');assert.ok(lato.files.some(([,l])=>l==='Regular')&&lato.files.some(([,l])=>l==='Bold Italic'));
+ assert.ok(c.families.find(f=>f.dir==='orbitron').files.some(([,l])=>l==='Variable · wght'));
+});
