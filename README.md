@@ -10,6 +10,8 @@ WebAssembly engine on the same origin.
 
 - Logo composer: real outlines, spacing, colours, symbols, transparency, presets,
   SVG/PNG/asset ZIP downloads, editable project files and undo/redo.
+- 27 bundled open-source typefaces in four groups (Code · mono, Techno · display,
+  Pixel · retro, Clean · sans) and 17 logo symbols plus wordmark-only.
 - Glyph lab: draggable Bézier points, coordinate editing, blank-glyph drawing,
   side-bearing handles, visual pair kerning, and a ligature substitution map.
 - SVG-to-glyph import/drop: path geometry only; convert shapes to paths and flatten
@@ -81,6 +83,18 @@ JetBrains Mono Project Authors, OFL 1.1 in `public/fonts/OFL-JetBrains.txt`.
 
 The Monaspace WOFF is the unchanged Fontsource Latin asset retained from DWCode's
 approved Bracket pack. JetBrains Mono is from its official upstream repository.
+
+The other 25 typefaces are Fontsource Latin WOFF files, each next to its licence in
+`public/fonts/OFL-<id>.txt`. They're listed in `tools/fonts.json`;
+`node tools/fetch-fonts.mjs` downloads them and accepts a font only if:
+- its licence passes the app's own SIL OFL 1.1 reader with no ambiguous
+  Reserved Font Name;
+- it covers A–Z, a–z and 0–9;
+- its bytes match the SHA-256 in `tools/fonts.lock.json`.
+
+The script then generates `src/font-library.js`. CI runs it with `--check`. Iosevka
+and Share Tech Mono were left out: their published licence files are not a complete
+OFL text, or declare reserved names ambiguously.
 Cybercore's MIT notice is in `public/theme-engine/LICENSE-MIT`. opentype.js and
 fflate are MIT licensed; see [THIRD_PARTY.md](THIRD_PARTY.md).
 

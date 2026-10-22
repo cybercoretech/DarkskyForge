@@ -86,5 +86,19 @@ test('Font export writes OTF, TTF and WOFF2 that the browser font sanitizer acce
    const c=document.createElement('canvas').getContext('2d');c.font=`48px "${label}", monospace`;const ours=c.measureText('DARKSKY').width;c.font='48px monospace';return face.status+' '+(ours!==c.measureText('DARKSKY').width);},[Buffer.from(files[name]).toString('base64'),'Check'+type.replace(/\W/g,'')]);
   expect(result,`${name} must load as a web font`).toBe('loaded true');
  }
+test('Typeface and symbol pickers list the bundled library and redraw the logo',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ expect(await page.locator('#font-select optgroup').count()).toBe(4);
+ expect(await page.locator('#font-select option').count()).toBeGreaterThanOrEqual(27);
+ expect(await page.locator('#symbol option').count()).toBeGreaterThanOrEqual(18);
+ for(const id of ['orbitron','press-start','syne']){
+  const before=await page.locator('#logo-preview svg').innerHTML();
+  await page.locator('#font-select').selectOption(id);
+  await expect.poll(()=>page.locator('#logo-preview svg').innerHTML()).not.toBe(before);
+ }
+ await page.locator('#symbol').selectOption('saucer');await expect.poll(()=>page.locator('#logo-preview svg ellipse').count()).toBeGreaterThan(0);
+ expect(await page.locator('#logo-preview svg ellipse').count()).toBeGreaterThan(0);
+ await page.reload();await expect(page.locator('#font-select')).toHaveValue('syne');await expect(page.locator('#symbol')).toHaveValue('saucer');
  expect(errors).toEqual([]);
 });
