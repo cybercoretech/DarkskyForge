@@ -10,9 +10,11 @@
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test",
     "build:themes": "node tools/build-themes.mjs",
-    "deploy": "node tools/deploy.mjs"
+    "deploy": "node tools/deploy.mjs",
+    "test:fonts": "node tools/export-fixtures.mjs && python3 tools/validate-fonts.py"
   },
   "dependencies": {
+    "brotli-wasm": "3.0.1",
     "fflate": "0.8.3",
     "opentype.js": "2.0.0"
   },

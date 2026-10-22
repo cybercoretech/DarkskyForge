@@ -14,8 +14,10 @@ WebAssembly engine on the same origin.
   side-bearing handles, visual pair kerning, and a ligature substitution map.
 - SVG-to-glyph import/drop: path geometry only; convert shapes to paths and flatten
   transforms first. Imported markup is never attached to the document.
-- Font compilation: a renamed OTF subset, with custom metrics, `kern` pairs and
-  GSUB ligatures. The original OFL licence accompanies every font/artwork export.
+- Font compilation: a renamed subset as OTF (CFF), TTF (TrueType `glyf`) and/or
+  WOFF2 with a ready `@font-face` CSS file, including custom metrics, `kern` pairs
+  and GSUB ligatures. The original OFL licence accompanies every font/artwork export.
+  Exports are checked by fontTools in CI and by Chrome's font sanitizer in the browser tests.
 - Live `@font-face` preview with size and light/dark controls. This uses the actual
   current browser/OS renderer, not an imitation of ClearType or macOS.
 - Local TTF/OTF/WOFF imports accompanied by an OFL 1.1 licence. WOFF2 and other
