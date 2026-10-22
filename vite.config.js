@@ -5,4 +5,4 @@ const headers=Object.fromEntries(readFileSync(new URL('./public/_headers',import
 // brotli-wasm's "browser" entry is CommonJS for webpack; use its ES module
 // web build, which loads brotli_wasm_bg.wasm as a same-origin asset (CSP-safe).
 const brotliWeb=fileURLToPath(new URL('./node_modules/brotli-wasm/index.web.js',import.meta.url));
-export default defineConfig({preview:{headers},resolve:{alias:{'brotli-wasm':brotliWeb}},optimizeDeps:{exclude:['brotli-wasm']}});
+export default defineConfig({preview:{headers},resolve:{alias:{'brotli-wasm':brotliWeb}},optimizeDeps:{exclude:['brotli-wasm']},worker:{format:'es'}});

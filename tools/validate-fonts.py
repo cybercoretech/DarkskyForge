@@ -39,4 +39,15 @@ for fid in ["krypton", "jetbrains"]:
     m = ttf["maxp"]; h = ttf["head"]
     print(f"{fid}: {len(ttf.getGlyphOrder())} glyphs, worst area drift {worst*100:.3f}%, maxPoints {m.maxPoints}, maxContours {m.maxContours}, indexToLoc {h.indexToLocFormat}, tables {' '.join(sorted(ttf.keys()))}")
     print(f"  kern pairs {len(ttf['kern'].kernTables[0].kernTable)}, GSUB features {[f.FeatureTag for f in ttf['GSUB'].table.FeatureList.FeatureRecord]}")
+# Autohinted TrueType: instructions present, outlines exactly unchanged.
+for fid in ["krypton", "jetbrains"]:
+    plain, hinted = TTFont(f"{out}/{fid}.ttf"), TTFont(f"{out}/{fid}.hinted.ttf")
+    for t in hinted.keys(): hinted[t]
+    missing = [t for t in ("fpgm", "prep", "cvt ", "gasp") if t not in hinted]
+    programs = sum(1 for n in hinted.getGlyphOrder() if getattr(hinted["glyf"][n], "program", None) and len(hinted["glyf"][n].program.getBytecode()))
+    same = all(hinted["glyf"][n].getCoordinates(hinted["glyf"])[0] == plain["glyf"][n].getCoordinates(plain["glyf"])[0] for n in plain.getGlyphOrder())
+    if missing or not programs or not same:
+        ok = False; print(f"  ✗ {fid} hinted: missing {missing}, glyph programs {programs}, outlines same {same}")
+    else:
+        print(f"{fid} hinted: fpgm/prep/cvt/gasp present, {programs} glyph programs, outlines identical")
 print("ALL VALID" if ok else "PROBLEMS FOUND"); sys.exit(0 if ok else 1)
