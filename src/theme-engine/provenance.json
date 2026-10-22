@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/cybercoretech/cybercore",
+  "commit": "c435a6dfc6a83343e68482679f676f1cb9c7dc5b",
+  "dirty": false,
+  "bindings": "wasm-bindgen 0.2.129"
+}
