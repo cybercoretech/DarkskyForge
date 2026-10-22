@@ -30,6 +30,12 @@ WebAssembly engine on the same origin.
   - Projects store the pinned reference, so a Google font survives a reload.
   - Exports record the source URL and commit.
   - Variable fonts are edited at their default instance and exported as static fonts.
+- Autohinting for TTF/WOFF2 exports. It's on by default and can be switched off.
+  - ttfautohint 1.8.4 compiled to WebAssembly, running in a Web Worker.
+  - Its output is byte-identical to the native ttfautohint in every hinting table.
+  - Hints sharpen small text where TrueType instructions are used (Windows,
+    bi-level rendering); macOS and most Linux setups largely ignore them.
+  - Hinted files are about 30% larger.
 - Local TTF/OTF/WOFF imports accompanied by an OFL 1.1 licence. WOFF2 and other
   licences are not yet supported. Reserved names are checked before font export.
 - Project saving via File System Access where supported, with a download fallback.

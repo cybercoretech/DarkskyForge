@@ -19,6 +19,10 @@ jobs:
       - run: npm test
       - name: Verify bundled fonts (licences, coverage, pinned checksums)
         run: node tools/fetch-fonts.mjs --check
+      - name: Check the vendored ttfautohint build matches its provenance
+        run: |
+          cd src/autohint
+          python3 -c "import json;[print(h+'  '+f) for f,h in json.load(open('provenance.json'))['outputs'].items()]" | sha256sum -c -
       - name: Validate the Google Fonts catalogue
         run: node tools/build-google-catalog.mjs --check
       - uses: actions/setup-python@v5

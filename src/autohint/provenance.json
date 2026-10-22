@@ -1,0 +1,6 @@
+{
+  "ttfautohint": {"version": "1.8.4", "source": "https://download.savannah.gnu.org/releases/freetype/ttfautohint-1.8.4.tar.gz", "sha256": "8a876117fa6ebfd2ffe1b3682a9a98c802c0f47189f57d3db4b99774206832e1", "signature": "Werner Lemberg <wl@gnu.org>, DSA key 58E0C111E39F5408C5D3EC76C1A60EACE707FDA5", "license": "FreeType License (FTL), chosen from FTL/GPLv2"},
+  "emscripten": "6.0.11",
+  "ports": {"freetype": "VER-2-14-3", "harfbuzz": "3.2.0"},
+  "outputs": {"ttfautohint.mjs": "4db88545a92510acd93096dde25545254a7f37cf85592e021af8cf8791178bbc", "ttfautohint.wasm": "e81abbeda6dfe541f7c230cafd391df2b00556bd3b8bb920efbd777d4f9d2d38"}
+}

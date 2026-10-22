@@ -141,3 +141,21 @@ test('Google Fonts import downloads a pinned family with its licence and survive
  expect(strFromU8(files['README.txt'])).toContain(`google/fonts commit ${commit}`);
  expect(errors).toEqual([]);
 });
+
+test('Autohinting runs in a worker under the CSP and can be switched off',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/Content Security Policy/i.test(m.text()))errors.push(m.text());});
+ const tags=bytes=>{const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);return Array.from({length:v.getUint16(4)},(_,i)=>String.fromCharCode(...bytes.subarray(12+i*16,16+i*16)));};
+ await page.goto('/');await expect(page.locator('body')).toHaveAttribute('data-ready','true');
+ await page.getByRole('button',{name:/02 Glyph lab/}).click();await page.locator('#font-name').fill('Hint Test');
+ await expect(page.locator('#format-autohint')).toBeChecked();
+ const exportTtf=async()=>{const dl=page.waitForEvent('download');await page.locator('#export-font').click();return unzipSync(fs.readFileSync(await(await dl).path()));};
+ const hinted=await exportTtf();
+ expect(tags(hinted['hint-test.ttf'])).toEqual(expect.arrayContaining(['fpgm','prep','cvt ','gasp']));
+ await expect(page.locator('#status')).not.toContainText('Autohinting failed');
+ const loaded=await page.evaluate(async b64=>{const f=new FontFace('HintCheck',Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));await f.load();return f.status;},Buffer.from(hinted['hint-test.ttf']).toString('base64'));
+ expect(loaded).toBe('loaded');
+ await page.locator('#format-autohint').uncheck();
+ const plain=await exportTtf();
+ expect(tags(plain['hint-test.ttf'])).not.toContain('fpgm');
+ expect(errors).toEqual([]);
+});

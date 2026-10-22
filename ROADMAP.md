@@ -21,11 +21,26 @@ saving, and the integrated WASM Theme Studio. This document records the user's
 
 ## Autohinting and file formats
 
-There is no cosmetic “autohinting” toggle in the current app. Genuine hinting must
-emit valid instructions/tables and demonstrate better small-size rendering.
-Evaluate [ttfautohint](https://freetype.org/ttfautohint/) compiled to WASM in a Worker
-for TrueType outputs and a separate CFF/PostScript hinter for OTF. Validate hinted
-fonts with independent parsers/sanitizers and size-by-size rendering comparisons.
+Done: ttfautohint 1.8.4, compiled to WebAssembly with FreeType 2.14.3 and HarfBuzz
+3.2.0, runs in a Web Worker and hints TTF/WOFF2 exports. The build is reproducible
+(`tools/build-ttfautohint.sh`: a signed, pinned tarball, emsdk 6.0.11) and CSP-safe:
+no embind, and `-sDYNAMIC_EXECUTION=0`.
+
+Verification:
+- The output is byte-identical to the native ttfautohint in every table except the
+  packed `name` table (same text) and the head checksum.
+- Outlines are unchanged.
+- Chrome's OTS accepts the hinted fonts.
+- In monochrome rendering at 11–13 px, JetBrains Mono's "K" stops collapsing
+  into an "H".
+
+Still to do:
+- Expose ttfautohint options (hinting range, x-height increase, symbol mode,
+  stem-width modes).
+- Hint CFF (OTF) outputs, which ttfautohint doesn't handle.
+- A Windows rendering comparison captured on Windows itself.
+- HarfBuzz 3.2.0 is old. It is confined to the worker's WebAssembly sandbox,
+  but should move to a newer Emscripten port when one ships.
 
 Done: OTF (CFF), TTF (quadratic `glyf`/`loca` conversion in `src/fontformats.js`) and
 WOFF2 (our own container writer with untransformed `glyf`/`loca` plus Brotli from

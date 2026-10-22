@@ -1,7 +1,7 @@
 import {typography} from './typography.js';
 import * as opentype from 'opentype.js/dist/opentype.mjs';
 import {zipSync,strToU8} from 'fflate';
-import {otfToTtf,toWoff2} from './fontformats.js';
+import {otfToTtf,toWoff2,autohintTtf} from './fontformats.js';
 import {DEFAULT,FONT_LIBRARY,FONT_GROUPS,SYMBOLS,googleFontRef,googleFontURL,readLicense,validateProject,composeSVG,buildFont,glyphCommands,pathFrom,safeName,escapeXML} from './model.js';
 
 const $=s=>document.querySelector(s);
@@ -155,7 +155,7 @@ function setMode(next){mode=next;for(const m of ['logo','glyph','theme'])$('#'+m
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 function showInfo(title,text){$('#dialog-title').textContent=title;$('#dialog-content').textContent=text;$('#info-dialog').showModal();}
 $('#close-dialog').onclick=()=>$('#info-dialog').close();$('#view-license').onclick=()=>showInfo('Font licence',license.text);
-$('#about-button').onclick=()=>showInfo('DarkskyForge','An open creative toolkit by Darkstardevx / Cybercore.\n\nFonts and projects are processed on your device. No accounts, analytics, tracking, or uploaded documents. Browser storage holds your current built-in-font project and custom themes. Imported fonts stay in this session; save a project file to keep them.\n\nFonts: '+FONT_LIBRARY.length+' open-source typefaces, each under the SIL Open Font License 1.1 and shipped with its licence. Use Read font licence for the complete original text.\n\nTechnology: Cybercore (MIT), opentype.js (MIT), fflate (MIT), brotli-wasm (Apache-2.0) with Google Brotli (MIT), Vite (MIT).\n\nFont exports are renamed subsets (OTF, TTF and/or WOFF2) containing your composition characters and edited glyphs. Custom kerning and ligatures are included. Source hinting and other advanced shaping are not retained.\n\nhttps://github.com/cybercoretech/DarkskyForge\nhttps://openfontlicense.org/ofl-faq/');
+$('#about-button').onclick=()=>showInfo('DarkskyForge','An open creative toolkit by Darkstardevx / Cybercore.\n\nFonts and projects are processed on your device. No accounts, analytics, tracking, or uploaded documents. Browser storage holds your current built-in-font project and custom themes. Imported fonts stay in this session; save a project file to keep them.\n\nFonts: '+FONT_LIBRARY.length+' open-source typefaces, each under the SIL Open Font License 1.1 and shipped with its licence. Use Read font licence for the complete original text.\n\nTechnology: Cybercore (MIT), opentype.js (MIT), fflate (MIT), brotli-wasm (Apache-2.0) with Google Brotli (MIT), ttfautohint and FreeType (FreeType License), HarfBuzz (MIT), zlib, Vite (MIT). Portions of this software are copyright © 2026 The FreeType Project (www.freetype.org). All rights reserved.\n\nFont exports are renamed subsets (OTF, TTF and/or WOFF2) containing your composition characters and edited glyphs. Custom kerning and ligatures are included. Source hinting and other advanced shaping are not retained.\n\nhttps://github.com/cybercoretech/DarkskyForge\nhttps://openfontlicense.org/ofl-faq/');
 
 // Glyph lab: source coordinates are kept in font units, independent of preview scale.
 function character(){return [...$('#glyph-character').value][0]||'D';}
@@ -229,13 +229,19 @@ typographyTools=typography({getState:()=>state,getFont:()=>font,getLicense:()=>l
 $('#export-font').onclick=run(async()=>{
   const want={otf:$('#format-otf').checked,ttf:$('#format-ttf').checked,woff2:$('#format-woff2').checked};
   if(!want.otf&&!want.ttf&&!want.woff2)throw Error('Choose at least one font format.');
+  let hintNote='';
   const base=safeName(state.fontName),otf=buildFont(font,state,license),files={...licenseFiles(),'darksky-project.json':strToU8(projectJSON())};
   if(want.otf)files[`${base}.otf`]=new Uint8Array(otf);
   if(want.ttf||want.woff2){
-    const ttf=otfToTtf(otf);if(want.ttf)files[`${base}.ttf`]=new Uint8Array(ttf);
+    let ttf=otfToTtf(otf);
+    if($('#format-autohint').checked){
+      tell('Autohinting with ttfautohint…');
+      try{ttf=await autohintTtf(ttf);}catch(e){hintNote=` Autohinting failed (${e.message}); TrueType files were exported without hints.`;}
+    }
+    if(want.ttf)files[`${base}.ttf`]=new Uint8Array(ttf);
     if(want.woff2){tell('Compressing WOFF2…');files[`${base}.woff2`]=new Uint8Array(await toWoff2(ttf));files[`${base}.css`]=strToU8(fontFaceCSS(state.fontName,base,want));}
   }
-  zipDownload(`${base}-font.zip`,files);tell(`Renamed font subset exported (${Object.keys(want).filter(k=>want[k]).map(k=>k.toUpperCase()).join(', ')}) with its original licence.`);
+  zipDownload(`${base}-font.zip`,files);tell(`Renamed font subset exported (${Object.keys(want).filter(k=>want[k]).map(k=>k.toUpperCase()).join(', ')}) with its original licence.${hintNote}`);
 });
 function fontFaceCSS(family,base,want){const src=[want.woff2&&`url("${base}.woff2") format("woff2")`,want.ttf&&`url("${base}.ttf") format("truetype")`,want.otf&&`url("${base}.otf") format("opentype")`].filter(Boolean).join(',\n       ');return `/* ${family}: generated by DarkskyForge. Licence: OFL.txt */\n@font-face {\n  font-family: "${family.replace(/["\\]/g,'')}";\n  src: ${src};\n  font-display: swap;\n}\n`;}
 

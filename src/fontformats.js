@@ -159,3 +159,15 @@ export async function toWoff2(sfntBuffer){
   const brotli=await (await import('brotli-wasm')).default;
   return encodeWoff2(sfntBuffer,bytes=>brotli.compress(bytes,{quality:11}));
 }
+
+// ── TrueType autohinting (ttfautohint in a Web Worker) ─────────────────────
+let hintWorker,hintSeq=0;const pending=new Map();
+export function autohintTtf(ttfBuffer,options){
+  if(!hintWorker){
+    hintWorker=new Worker(new URL('./autohint-worker.js',import.meta.url),{type:'module'});
+    hintWorker.onmessage=({data})=>{const p=pending.get(data.id);if(!p)return;pending.delete(data.id);data.error?p.reject(Error(data.error)):p.resolve(data.bytes);};
+    hintWorker.onerror=e=>{for(const p of pending.values())p.reject(Error(e.message||'The autohinter failed to start.'));pending.clear();hintWorker=null;};
+  }
+  const id=++hintSeq,copy=ttfBuffer.slice(0);
+  return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});hintWorker.postMessage({id,bytes:copy,options},[copy]);});
+}
